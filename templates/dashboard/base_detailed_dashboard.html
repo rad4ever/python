@@ -1,0 +1,328 @@
+{% extends 'dashboard/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block title %}{% block dashboard_title %}Detailed Dashboard{% endblock %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% block page_header %}{% endblock %}
+
+    <!-- Filters Row -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">{{ group_title }} Performance Filters</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="form-inline">
+                        <select name="year" class="form-control mr-2">
+                            <option value="">All Years</option>
+                            {% for yr in years %}
+                                <option value="{{ yr }}" {% if selected_year == yr|stringformat:'s' %}selected{% endif %}>{{ yr }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="company" class="form-control mr-2">
+                            <option value="">All Companies</option>
+                            {% for comp in companies %}
+                                <option value="{{ comp.comp_id }}" {% if selected_company == comp.comp_id|stringformat:'s' %}selected{% endif %}>Company {{ comp.comp_id }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <input type="text" name="search" class="form-control mr-2" placeholder="Search..." value="{{ search_query }}">
+                        
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row">
+        <!-- Total Sales Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Sales</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ${{ data.total_sales|floatformat:2|intcomma }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bookings Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Bookings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ data.total_bookings|intcomma }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Invoice Value Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Avg Invoice Value</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ${{ data.avg_invoice_value|floatformat:2|intcomma }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Profit Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Profit</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ${{ data.total_profit|floatformat:2|intcomma }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends Chart -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Revenue Trends</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="monthlyTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers Table -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 10 {{ group_title }}s</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>{{ group_title }}</th>
+                                    <th>Total Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in top_performers %}
+                                <tr>
+                                    <td>{{ item|get_dict_item:group_field }}</td>
+                                    <td>${{ item.total_sales|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Performance Table -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Detailed {{ group_title }} Performance</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>{{ group_title }}</th>
+                                    <th>Total Sales</th>
+                                    <th>Total Cost</th>
+                                    <th>Total Profit</th>
+                                    <th>Total Bookings</th>
+                                    <th>Avg Invoice Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in page_stats %}
+                                <tr>
+                                    <td>{{ item|get_dict_item:group_field }}</td>
+                                    <td>${{ item.total_sales|floatformat:2|intcomma }}</td>
+                                    <td>${{ item.total_cost|floatformat:2|intcomma }}</td>
+                                    <td>${{ item.total_profit|floatformat:2|intcomma }}</td>
+                                    <td>{{ item.total_bookings|intcomma }}</td>
+                                    <td>${{ item.avg_invoice_value|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if data.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ data.previous_page_number }}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item disabled">
+                                <span class="page-link">Page {{ data.number }} of {{ data.paginator.num_pages }}</span>
+                            </li>
+                            
+                            {% if data.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ data.next_page_number }}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var monthlyTrendsData = {{ monthly_trends|safe }};
+    var ctx = document.getElementById('monthlyTrendsChart');
+    
+    if (!ctx) {
+        console.error('Chart canvas not found');
+        return;
+    }
+
+    ctx = ctx.getContext('2d');
+    
+    // Prepare data for Chart.js
+    var labels = [...new Set(monthlyTrendsData.map(item => {
+        var date = new Date(item.month);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    }))];
+
+    var datasets = [...new Set(monthlyTrendsData.map(item => item.performer))].map(performer => {
+        var color = getRandomColor();
+        return {
+            label: performer,
+            data: labels.map(month => {
+                var matchingData = monthlyTrendsData.find(item => {
+                    var date = new Date(item.month);
+                    var formattedMonth = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                    return formattedMonth === month && item.performer === performer;
+                });
+                return matchingData ? matchingData.revenue : 0;
+            }),
+            fill: false,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.1
+        };
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Revenue Trends'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD'
+                            }).format(context.parsed.y);
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Revenue'
+                    },
+                    ticks: {
+                        callback: function(value, index, values) {
+                            return new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+</script>
+{% endblock %}
+{% endblock %}

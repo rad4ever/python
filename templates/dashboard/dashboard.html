@@ -1,0 +1,346 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - Travel Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1.5rem;
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df, #224abe);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #1cc88a, #13855c);
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #36b9cc, #258391);
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #f6c23e, #dda20a);
+    }
+
+    .chart-container {
+        position: relative;
+        margin: auto;
+        height: 300px;
+        padding: 15px;
+    }
+
+    .trend-indicator {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+    }
+
+    .trend-up {
+        background-color: rgba(28, 200, 138, 0.1);
+        color: #1cc88a;
+    }
+
+    .trend-down {
+        background-color: rgba(231, 74, 59, 0.1);
+        color: #e74a3b;
+    }
+
+    .quick-stats {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard Overview</h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-primary shadow-sm" id="refreshData">
+                <i class="fas fa-sync-alt fa-sm"></i> Refresh Data
+            </button>
+            <button class="btn btn-sm btn-outline-primary shadow-sm" id="downloadReport">
+                <i class="fas fa-download fa-sm"></i> Generate Report
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="row">
+        <!-- Total Sales Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="kpi-card card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Sales</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_sales|intcomma }}</div>
+                            <div class="quick-stats">
+                                <span class="trend-indicator trend-up">
+                                    <i class="fas fa-arrow-up"></i> 8.3%
+                                </span>
+                                <span class="text-muted small">vs last month</span>
+                            </div>
+                        </div>
+                        <div class="stats-icon bg-gradient-primary text-white">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar structure for other KPI cards -->
+        <!-- Revenue Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="kpi-card card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_revenue|intcomma }}</div>
+                            <div class="quick-stats">
+                                <span class="trend-indicator trend-up">
+                                    <i class="fas fa-arrow-up"></i> 12.5%
+                                </span>
+                                <span class="text-muted small">vs last month</span>
+                            </div>
+                        </div>
+                        <div class="stats-icon bg-gradient-success text-white">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Active Agents and Activities cards with similar structure -->
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Sales Overview Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Sales Overview</h6>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" id="weeklyView">Weekly</button>
+                        <button class="btn btn-sm btn-outline-primary active" id="monthlyView">Monthly</button>
+                        <button class="btn btn-sm btn-outline-primary" id="yearlyView">Yearly</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Agents Performance -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Agents</h6>
+                    <select class="form-select form-select-sm" style="width: auto;">
+                        <option>This Month</option>
+                        <option>Last 3 Months</option>
+                        <option>This Year</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="agentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    initializeEventListeners();
+});
+
+function initializeEventListeners() {
+    // Refresh Data Button
+    document.getElementById('refreshData').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin fa-sm"></i> Refreshing...';
+        setTimeout(() => {
+            initializeCharts();
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-sync-alt fa-sm"></i> Refresh Data';
+        }, 1000);
+    });
+
+    // Time Period Buttons
+    ['weeklyView', 'monthlyView', 'yearlyView'].forEach(id => {
+        document.getElementById(id).addEventListener('click', function(e) {
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            updateChartData(id);
+        });
+    });
+}
+
+function createSalesChart(data) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(78, 115, 223, 0.2)');
+    gradient.addColorStop(1, 'rgba(78, 115, 223, 0)');
+
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Sales',
+                data: data.values,
+                borderColor: '#4e73df',
+                backgroundColor: gradient,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#4e73df',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#4e73df',
+                pointHoverBorderColor: '#fff',
+                pointHitRadius: 10,
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#858796',
+                    titleFont: {
+                        size: 14,
+                        family: "'Nunito', sans-serif",
+                    },
+                    bodyColor: '#858796',
+                    bodyFont: {
+                        size: 13,
+                        family: "'Nunito', sans-serif",
+                    },
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    caretPadding: 10,
+                    displayColors: false,
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        borderDash: [2],
+                        drawBorder: false,
+                        zeroLineColor: '#dddfeb',
+                        zeroLineBorderDash: [2],
+                        zeroLineBorderDashOffset: [2]
+                    },
+                    ticks: {
+                        padding: 10,
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createAgentsChart(data) {
+    const ctx = document.getElementById('agentsChart').getContext('2d');
+    return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#e74a3b'
+                ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+// Add other necessary functions...
+</script>
+{% endblock %}

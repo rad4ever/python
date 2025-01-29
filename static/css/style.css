@@ -1,0 +1,147 @@
+/* General styles */
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Animations and transitions */
+.animated {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Improved KPI cards */
+.kpi-card {
+    transition: all 0.3s ease-in-out;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.kpi-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 8px 8px 20px #c1c1c1, -8px -8px 20px #ffffff;
+}
+
+.kpi-card h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4e73df;
+}
+
+.kpi-card p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Improved chart container */
+.chart-container {
+    transition: all 0.3s ease-in-out;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-container:hover {
+    box-shadow: 8px 8px 20px #c1c1c1, -8px -8px 20px #ffffff;
+}
+
+/* Improved sidebar */
+.sidebar {
+    background: linear-gradient(180deg, #4e73df 0%, #224abe 100%);
+    transition: all 0.3s ease-in-out;
+    min-height: 100vh;
+}
+
+.sidebar .nav-link {
+    transition: all 0.2s ease-in-out;
+    border-radius: 5px;
+    margin: 5px 0;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 10px 15px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    color: white;
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Improved table */
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table thead {
+    background-color: #4e73df;
+    color: white;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Loading animation */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #4e73df;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Improved responsiveness */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        height: 100vh;
+        z-index: 999;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .navbar-toggler {
+        display: block;
+    }
+}

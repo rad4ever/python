@@ -1,0 +1,238 @@
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #224abe;
+    --text-color: #5a5c69;
+    --bg-color: #f8f9fc;
+    --hover-color: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(58, 59, 69, 0.15);
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    transition: all 0.3s ease-in-out;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    text-align: center;
+    background: var(--secondary-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#sidebar .sidebar-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+}
+
+#sidebar ul li a {
+    padding: 12px 20px;
+    font-size: 1rem;
+    display: block;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    border-left: 3px solid transparent;
+}
+
+#sidebar ul li a:hover {
+    background: var(--hover-color);
+    color: #fff;
+    border-left: 3px solid #fff;
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+}
+
+/* Main Content */
+#content {
+    margin-left: 250px;
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s ease-in-out;
+}
+
+#content.active {
+    margin-left: 0;
+}
+
+/* Navbar */
+.navbar {
+    padding: 15px 20px;
+    background: #fff;
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.navbar .navbar-toggler {
+    border: none;
+    outline: none;
+}
+
+.navbar .navbar-toggler i {
+    color: var(--primary-color);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.card .card-header {
+    background: var(--primary-color);
+    color: #fff;
+    border-radius: 10px 10px 0 0;
+    padding: 15px 20px;
+    font-weight: 700;
+}
+
+.card .card-body {
+    padding: 20px;
+}
+
+/* Charts */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 300px;
+    width: 100%;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+/* Tables */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.table thead {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+
+    #sidebar.active {
+        margin-left: 0;
+    }
+
+    #content {
+        margin-left: 0;
+    }
+
+    #content.active {
+        margin-left: 250px;
+    }
+
+    .navbar-toggler {
+        display: block;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* New enhancements 1 */ 
+.trend-indicator {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.trend-up {
+    background-color: rgba(28, 200, 138, 0.1);
+    color: #1cc88a;
+}
+
+.trend-down {
+    background-color: rgba(231, 74, 59, 0.1);
+    color: #e74a3b;
+}
+
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 15rem;
+    width: 100%;
+}

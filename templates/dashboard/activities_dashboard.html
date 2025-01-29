@@ -1,0 +1,208 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Main Menu -->
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Activities Dashboard</h1>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" 
+                               href="{% url 'dashboard' %}">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Main Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/activities/' %}active{% endif %}" 
+                               href="{% url 'activities_dashboard' %}">
+                                <i class="fas fa-fw fa-calendar"></i>
+                                <span>Activities</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/agents/' %}active{% endif %}" 
+                               href="{% url 'agents_dashboard' %}">
+                                <i class="fas fa-fw fa-users"></i>
+                                <span>Agents</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/providers/' %}active{% endif %}" 
+                               href="{% url 'providers_dashboard' %}">
+                                <i class="fas fa-fw fa-building"></i>
+                                <span>Providers</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/sales-officers/' %}active{% endif %}" 
+                               href="{% url 'sales_officers_dashboard' %}">
+                                <i class="fas fa-fw fa-user-tie"></i>
+                                <span>Sales Officers</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- KPI Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Activities</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-activities">
+                                {{ kpi_data.activities.value|default:0|intcomma }}
+                            </div>
+                            <div class="mt-2">
+                                <span id="activities-growth" class="trend-indicator {% if kpi_data.activities.growth > 0 %}trend-up{% else %}trend-down{% endif %}">
+                                    {{ kpi_data.activities.growth|default:0|floatformat:2 }}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-revenue">
+                                ${{ kpi_data.revenue.value|default:0|floatformat:2|intcomma }}
+                            </div>
+                            <div class="mt-2">
+                                <span id="revenue-growth" class="trend-indicator {% if kpi_data.revenue.growth > 0 %}trend-up{% else %}trend-down{% endif %}">
+                                    {{ kpi_data.revenue.growth|default:0|floatformat:2 }}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Average Price</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="avg-price">
+                                ${{ kpi_data.avg_price.value|default:0|floatformat:2|intcomma }}
+                            </div>
+                            <div class="mt-2">
+                                <span id="price-growth" class="trend-indicator {% if kpi_data.avg_price.growth > 0 %}trend-up{% else %}trend-down{% endif %}">
+                                    {{ kpi_data.avg_price.growth|default:0|floatformat:2 }}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Net Earnings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="net-earnings">
+                                ${{ kpi_data.earnings.value|default:0|floatformat:2|intcomma }}
+                            </div>
+                            <div class="mt-2">
+                                <span id="earnings-growth" class="trend-indicator {% if kpi_data.earnings.growth > 0 %}trend-up{% else %}trend-down{% endif %}">
+                                    {{ kpi_data.earnings.growth|default:0|floatformat:2 }}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-coins fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Filter Buttons -->
+     <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group">
+                <button class="btn btn-primary active" data-range="monthly">Monthly</button>
+                <button class="btn btn-primary" data-range="weekly">Weekly</button>
+                <button class="btn btn-primary" data-range="yearly">Yearly</button>
+            </div>
+        </div>
+    </div>
+
+  <!-- Charts -->
+  <div class="row">
+    <div class="col-xl-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Activity Trends</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="activityTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Activity Types</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie">
+                    <canvas id="activityTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Ensure data is correctly passed and parsed
+    const initialData = JSON.parse('{{ data|escapejs }}');
+</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

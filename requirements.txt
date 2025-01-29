@@ -1,0 +1,12 @@
+Django>=4.2.0
+cx-Oracle>=8.3.0
+pandas>=2.0.0
+plotly>=5.18.0
+djangorestframework>=3.14.0
+python-dotenv>=1.0.0
+celery>=5.3.0
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+django-filter>=23.5
+django-crispy-forms>=2.1
+crispy-bootstrap5>=2023.10
